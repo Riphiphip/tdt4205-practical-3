@@ -25,7 +25,8 @@
 %type <node> variable_list argument_list parameter_list declaration_list function statement block
 %type <node> assign_statement return_statement print_statement null_statement if_statement while_statement
 %type <node> relation expression declaration print_item identifier number string
-%type <node> IDENTIFIER STRING NUMBER
+%type <string> IDENTIFIER STRING 
+%type <number> NUMBER
 %start program
 %%
 program: 
@@ -118,7 +119,7 @@ declaration_list:
 
 function:
     FUNC identifier '(' parameter_list ')' statement {
-        $$ = node_create(FUNCTION, NULL, 3, $2, $4, $6)
+        $$ = node_create(FUNCTION, NULL, 3, $2, $4, $6);
     }
 ;
 
