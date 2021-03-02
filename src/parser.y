@@ -220,7 +220,7 @@ print_item:
 identifier: 
     IDENTIFIER {
         char* node_data = strdup($1);
-        return node_create(IDENTIFIER_DATA, node_data, 0);
+        $$ = node_create(IDENTIFIER_DATA, node_data, 0);
     }
 ;
 
@@ -228,14 +228,14 @@ number:
     NUMBER {
         long* node_data = malloc(sizeof(long));
         *node_data = $1;
-        return node_create(NUMBER_DATA, node_data, 0);
+        $$ = node_create(NUMBER_DATA, node_data, 0);
     }
 ;
 
 string: 
     STRING {
         char* node_data = strdup($1);
-        return node_create(STRING_DATA, node_data, 0);
+        $$ = node_create(STRING_DATA, node_data, 0);
     }
 ;
 %%
