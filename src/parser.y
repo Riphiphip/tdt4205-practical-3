@@ -113,35 +113,74 @@ declaration_list:
         $$ = node_create(DECLARATION_LIST, NULL, 1, $1, $2);
     }
 
-function            : FUNC IDENTIFIER '(' parameter_list ')' statement
+function:
+    FUNC identifier '(' parameter_list ')' statement {
+        $$ = node_create(FUNCTION, NULL, 3, $2, $4, $6)
+    }
+;
 
-statement           : assign_statement
-                    | return_statement
-                    | print_statement
-                    | if_statement
-                    | while_statement
-                    | null_statement
-                    | block
+statement: 
+    assign_statement    { $$ = node_create(STATEMENT, NULL, 1, $1); }
+    | return_statement  { $$ = node_create(STATEMENT, NULL, 1, $1); }
+    | print_statement   { $$ = node_create(STATEMENT, NULL, 1, $1); }
+    | if_statement      { $$ = node_create(STATEMENT, NULL, 1, $1); }
+    | while_statement   { $$ = node_create(STATEMENT, NULL, 1, $1); }
+    | null_statement    { $$ = node_create(STATEMENT, NULL, 1, $1); }
+    | block             { $$ = node_create(STATEMENT, NULL, 1, $1); }
+;
 
-block               : OPENBLOCK declaration_list statement_list CLOSEBLOCK
-                    | OPENBLOCK statement_list CLOSEBLOCK
+block: 
+    OPENBLOCK declaration_list statement_list CLOSEBLOCK {
+        $$ = node_create(BLOCK, NULL, 2, $2, $3);
+    }
+    | OPENBLOCK statement_list CLOSEBLOCK {
+        $$ = node_create(BLOCK, NULL, 1, $2);
+    }
+;
 
-assign_statement    : IDENTIFIER ASSIGNMENT expression
+assign_statement: 
+    identifier ASSIGNMENT expression {
+        $$ = node_create(ASSIGN_STATEMENT, NULL, 2, $1, $3);
+    }
+;
 
-return_statement    : RETURN expression
+return_statement: 
+    RETURN expression {
+         $$ = node_create(RETURN_STATEMENT, NULL, 1, $2);
+    }
+;
 
-print_statement     : PRINT print_list
+print_statement: 
+    PRINT print_list {
+        $$ = node_create(PRINT_STATEMENT, NULL, 1, $1);
+    }
+;
 
-null_statement      : CONTINUE
+null_statement: 
+    CONTINUE {
+        $$ = node_create(NULL_STATEMENT, NULL, 0);
+    }
+;
 
-if_statement        : IF relation THEN statement
-                    | IF relation THEN statement ELSE statement
+if_statement: 
+    IF relation THEN statement {
+        $$ = node_create(IF_STATEMENT, NULL, 2, $2, $4);
+    }
+    | IF relation THEN statement ELSE statement {
+        $$ = node_create(IF_STATEMENT, NULL, 3, $2, $4, $6);
+    }
+;
 
-while_statement     : WHILE relation DO statement
+while_statement:
+    WHILE relation DO statement {
+        $$ = node_create(WHILE_STATEMENT, NULL, 2, $2, $4);
+    }
+;
 
-relation            : expression '=' expression
-                    | expression '<' expression
-                    | expression '>' expression
+relation            : expression '=' expression { $$ = relation_node($1, $3, "="); }
+                    | expression '<' expression { $$ = relation_node($1, $3, "<"); }
+                    | expression '>' expression { $$ = relation_node($1, $3, ">"); }
+;
 
 expression          : expression '|' expression
                     | expression '^' expression
@@ -156,17 +195,23 @@ expression          : expression '|' expression
                     | '~' expression
                     | '-' expression
                     | '(' expression ')'
+;
 
 declaration         : VAR variable_list
+;
 
 printitem           : expression
                     | string
+;
 
 identifier          : IDENTIFIER { }
+;
 
 number              : NUMBER {  }
+;
 
 string              : STRING {  }
+;
 %%
 
 int
@@ -174,4 +219,11 @@ yyerror ( const char *error )
 {
     fprintf ( stderr, "%s on line %d\n", error, yylineno );
     exit ( EXIT_FAILURE );
+}
+
+
+node_t* relation_node(node_t* exp1, node_t* exp2, char* optype)
+{
+    char* node_data = strdup(optype);
+    return node_create(RELATION, node_data, 2, exp1, exp2);
 }
