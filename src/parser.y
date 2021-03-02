@@ -20,6 +20,9 @@
     char* string;
 }
 
+%type <string> IDENTIFIER STRING
+%type <number> NUMBER 
+
 %start program
 %%
 program: 
