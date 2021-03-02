@@ -29,7 +29,7 @@ extern YYSTYPE yylval;
     "<<"                    { return LSHIFT; }
     ">>"                    { return RSHIFT; }
     ":="                    { return ASSIGNMENT;}
-    [0-9]+                  { sscanf(yytext, "%l", &yylval.number);
+    [0-9]+                  { sscanf(yytext, "%ld", &yylval.number);
                               return NUMBER; 
                             }
     [_a-zA-Z][_a-zA-Z0-9]*  { yylval.string = yytext; return IDENTIFIER; }
@@ -54,22 +54,6 @@ extern YYSTYPE yylval;
     .                       { yymore(); }
 }
 %%
-
-void send_number_node(void){
-    long* node_data = malloc(sizeof(long));
-    sscanf(yytext, "%l", node_data);
-    yylval = node_create(NUMBER_DATA, node_data, 0);
-}
-
-void send_string_node(void){
-    char* node_data = strdup(yytext));
-    yylval = node_create(STRING_DATA, node_data, 0);
-}
-
-void send_identifier_node(void){
-    char* node_data = strdup(yytext));
-    yylval = node_create(IDENTIFIER_DATA, node_data, 0);
-}
 
 // // Debug code
 // int main(void) {
