@@ -34,7 +34,7 @@ extern YYSTYPE yylval;
                             }
     [_a-zA-Z][_a-zA-Z0-9]*  { yylval.string = yytext; return IDENTIFIER; }
     [\t\n\r\v ]+            ;
-    .                       { yylval.character = yytext[0]; return yytext[0]; }
+    .                       { return yytext[0]; }
 }
 
 <IN_LINE_COMMENT>{

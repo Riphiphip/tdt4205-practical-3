@@ -18,17 +18,20 @@
     long number;
     char character;
     char* string;
+    node_t* node;
 }
 
-%type <string> IDENTIFIER STRING
-%type <number> NUMBER 
-
+%type <node> program global_list global statement_list print_list expression_list
+%type <node> variable_list argument_list parameter_list declaration_list function statement block
+%type <node> assign_statement return_statement print_statement null_statement if_statement while_statement
+%type <node> relation expression declaration print_item identifier number string
+%type <node> IDENTIFIER STRING NUMBER
 %start program
 %%
 program: 
     global_list {
         root = (node_t *) malloc ( sizeof(node_t) );
-        node_init ( root, PROGRAM, NULL, 1, $1 );
+        node_init ( root, PROGRAM, NULL, 1, $<node>1 );
         $$ = root;
     }
 ;
@@ -152,7 +155,7 @@ return_statement:
 
 print_statement: 
     PRINT print_list {
-        $$ = node_create(PRINT_STATEMENT, NULL, 1, $1);
+        $$ = node_create(PRINT_STATEMENT, NULL, 1, $2);
     }
 ;
 
