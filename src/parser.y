@@ -177,40 +177,62 @@ while_statement:
     }
 ;
 
-relation            : expression '=' expression { $$ = relation_node($1, $3, "="); }
-                    | expression '<' expression { $$ = relation_node($1, $3, "<"); }
-                    | expression '>' expression { $$ = relation_node($1, $3, ">"); }
+relation: 
+    expression '=' expression   { $$ = relation_node($1, $3, "="); }
+    | expression '<' expression { $$ = relation_node($1, $3, "<"); }
+    | expression '>' expression { $$ = relation_node($1, $3, ">"); }
 ;
 
-expression          : expression '|' expression
-                    | expression '^' expression
-                    | expression '&' expression
-                    | expression LSHIFT expression
-                    | expression RSHIFT expression
-                    | expression '+' expression
-                    | expression '-' expression
-                    | expression '*' expression
-                    | expression '/' expression
-                    | '-' expression
-                    | '~' expression
-                    | '-' expression
-                    | '(' expression ')'
+expression: 
+    expression '|' expression       { $$ = binop_node($1, $3, "|");  }
+    | expression '^' expression     { $$ = binop_node($1, $3, "^");  }
+    | expression '&' expression     { $$ = binop_node($1, $3, "&");  }
+    | expression LSHIFT expression  { $$ = binop_node($1, $3, "<<"); }
+    | expression RSHIFT expression  { $$ = binop_node($1, $3, ">>"); }
+    | expression '+' expression     { $$ = binop_node($1, $3, "+");  }
+    | expression '-' expression     { $$ = binop_node($1, $3, "-");  }
+    | expression '*' expression     { $$ = binop_node($1, $3, "*");  }
+    | expression '/' expression     { $$ = binop_node($1, $3, "/");  }
+    | '-' expression        { $$ = unop_node($2, "-"); }
+    | '~' expression        { $$ = unop_node($2, "~"); }
+    | '(' expression ')'    { $$ = $2; }
 ;
 
-declaration         : VAR variable_list
+declaration: 
+    VAR variable_list {
+        $$ = node_create(DECLARATION, NULL, 1, $2);
+    }
 ;
 
-printitem           : expression
-                    | string
+print_item: 
+    expression {
+        $$ = node_create(PRINT_ITEM, NULL, 1, $1);
+    }
+    | string {
+        $$ = node_create(PRINT_ITEM, NULL, 1, $1);
+    }
 ;
 
-identifier          : IDENTIFIER { }
+identifier: 
+    IDENTIFIER {
+        char* node_data = strdup($1);
+        return node_create(IDENTIFIER_DATA, node_data, 0);
+    }
 ;
 
-number              : NUMBER {  }
+number: 
+    NUMBER {
+        long* node_data = malloc(sizeof(long));
+        *node_data = $1;
+        return node_create(NUMBER_DATA, node_data, 0);
+    }
 ;
 
-string              : STRING {  }
+string: 
+    STRING {
+        char* node_data = strdup($1);
+        return node_create(STRING_DATA, node_data, 0);
+    }
 ;
 %%
 
@@ -226,4 +248,14 @@ node_t* relation_node(node_t* exp1, node_t* exp2, char* optype)
 {
     char* node_data = strdup(optype);
     return node_create(RELATION, node_data, 2, exp1, exp2);
+}
+
+node_t* binop_node(node_t* exp1, node_t* exp2, char* optype) {
+    char* node_data = strdup(optype);
+    return node_create(EXPRESSION, node_data, 2, exp1, exp2); 
+}
+
+node_t* unop_node(node_t* exp1, char* optype) {
+    char* node_data = strdup(optype);
+    return node_create(EXPRESSION, node_data, 1, exp1); 
 }
