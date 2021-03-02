@@ -39,7 +39,7 @@ void node_init(node_t *nd, node_index_t type, void *data, uint64_t n_children, .
 
     for (int i = 0; i < n_children; i++)
     {
-        nd->children[i] = va_arg(valist, node_t *);
+        nd->children[i] = va_arg(children, node_t *);
     }
     va_end(children);
 }
@@ -49,8 +49,12 @@ void node_init(node_t *nd, node_index_t type, void *data, uint64_t n_children, .
 
 node_t *node_create(node_index_t type, void *data, uint64_t n_children, ...)
 {
+    va_list children;
+    va_start(children, n_children);
+
     node_t *new_node = malloc(sizeof(node_t));
-    node_init(new_node);
+    node_init(new_node, type, data, n_children, children);
+    va_end(children);
     return new_node;
 }
 
