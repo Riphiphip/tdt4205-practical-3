@@ -29,10 +29,12 @@ extern YYSTYPE yylval;
     "<<"                    { return LSHIFT; }
     ">>"                    { return RSHIFT; }
     ":="                    { return ASSIGNMENT;}
-    [0-9]+                  { send_number_node(); return NUMBER; }
-    [_a-zA-Z][_a-zA-Z0-9]*  { send_identifier_node(); return IDENTIFIER; }
+    [0-9]+                  { sscanf(yytext, "%l", &yylval.number);
+                              return NUMBER; 
+                            }
+    [_a-zA-Z][_a-zA-Z0-9]*  { yylval.string = yytext; return IDENTIFIER; }
     [\t\n\r\v ]+            ;
-    .                       { return yytext[0]; }
+    .                       { yylval.character = yytext[0]; return yytext[0]; }
 }
 
 <IN_LINE_COMMENT>{
@@ -48,7 +50,7 @@ extern YYSTYPE yylval;
 
 <IN_STRING>{
     "\\\""                  { yymore(); }
-    "\""                    { send_string_node(); BEGIN(INITIAL); return STRING;}
+    "\""                    { yylval.string = yytext; BEGIN(INITIAL); return STRING;}
     .                       { yymore(); }
 }
 %%
