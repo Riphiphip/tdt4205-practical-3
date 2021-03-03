@@ -25,6 +25,8 @@ node_t* unop_node(node_t* exp1, char* optype) {
 %left '+' '-'
 %left '*' '/'
 %nonassoc UMINUS
+%nonassoc IF THEN
+%nonassoc ELSE
 %right '~'
 //%expect 1
 
