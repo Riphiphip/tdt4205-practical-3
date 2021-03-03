@@ -1,7 +1,6 @@
 %{
 #include <vslc.h>
 
-
 node_t* relation_node(node_t* exp1, node_t* exp2, char* optype)
 {
     char* node_data = strdup(optype);
@@ -28,6 +27,8 @@ node_t* unop_node(node_t* exp1, char* optype) {
 %nonassoc IF THEN
 %nonassoc ELSE
 %right '~'
+%nonassoc IF THEN
+%nonassoc ELSE
 //%expect 1
 
 %token FUNC PRINT RETURN CONTINUE IF THEN ELSE WHILE DO OPENBLOCK CLOSEBLOCK
@@ -50,8 +51,7 @@ node_t* unop_node(node_t* exp1, char* optype) {
 %%
 program: 
     global_list {
-        root = (node_t *) malloc ( sizeof(node_t) );
-        node_init ( root, PROGRAM, NULL, 1, $<node>1 );
+        root = node_create(PROGRAM, NULL, 1, $1);
         $$ = root;
     }
 ;
@@ -67,10 +67,10 @@ global_list:
 
 global: 
     function {
-        $$ = node_create(GLOBAL_LIST, NULL, 1, $1);
+        $$ = node_create(GLOBAL, NULL, 1, $1);
     }
     | declaration {
-        $$ = node_create(GLOBAL_LIST, NULL, 1, $1);
+        $$ = node_create(GLOBAL, NULL, 1, $1);
     }
 ;
 
@@ -189,9 +189,7 @@ if_statement:
     IF relation THEN statement {
         $$ = node_create(IF_STATEMENT, NULL, 2, $2, $4);
     }
-    | IF relation THEN statement ELSE statement {
-        $$ = node_create(IF_STATEMENT, NULL, 3, $2, $4, $6);
-    }
+    | IF relation THEN statement ELSE statement { $$ = node_create(IF_STATEMENT, NULL, 3, $2, $4, $6); }
 ;
 
 while_statement:
@@ -262,9 +260,8 @@ string:
 ;
 %%
 
-int
-yyerror ( const char *error )
+int yyerror (const char *error)
 {
-    fprintf ( stderr, "%s on line %d\n", error, yylineno );
-    exit ( EXIT_FAILURE );
+    fprintf (stderr, "%s on line %d\n near '%s'\n", error, yylineno, yytext);
+    exit (EXIT_FAILURE);
 }

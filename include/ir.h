@@ -10,7 +10,7 @@ typedef struct n {
 } node_t;
 
 void node_init (
-    node_t *n, node_index_t type, void *data, uint64_t n_children, ...
+    node_t *n, node_index_t type, void *data, uint64_t n_children, va_list children
 );
 
 /**

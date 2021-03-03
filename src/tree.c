@@ -27,11 +27,8 @@ void node_print(node_t *root, int nesting)
 }
 
 /* Take the memory allocated to a node and fill it in with the given elements */
-void node_init(node_t *nd, node_index_t type, void *data, uint64_t n_children, ...)
+void node_init(node_t *nd, node_index_t type, void *data, uint64_t n_children, va_list children)
 {
-    va_list children;
-    va_start(children, n_children);
-
     nd->type = type;
     nd->data = data;
     nd->n_children = n_children;
@@ -41,20 +38,20 @@ void node_init(node_t *nd, node_index_t type, void *data, uint64_t n_children, .
     {
         nd->children[i] = va_arg(children, node_t *);
     }
-    va_end(children);
 }
 
-
 // Allocate and initialize new node
-
 node_t *node_create(node_index_t type, void *data, uint64_t n_children, ...)
 {
-    va_list children;
-    va_start(children, n_children);
+    va_list *children = (va_list *)malloc(sizeof(va_list));
+    va_start(*children, n_children);
 
-    node_t *new_node = malloc(sizeof(node_t));
-    node_init(new_node, type, data, n_children, children);
-    va_end(children);
+    node_t *new_node = (node_t *)malloc(sizeof(node_t));
+    node_init(new_node, type, data, n_children, *children);
+
+    va_end(*children);
+    free(children);
+
     return new_node;
 }
 
