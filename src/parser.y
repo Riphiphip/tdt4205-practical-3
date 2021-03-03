@@ -47,215 +47,143 @@ node_t* unop_node(node_t* exp1, char* optype) {
 %type <number> NUMBER
 %start program
 %%
-program: 
-    global_list {
-        root = node_create(PROGRAM, NULL, 1, $1);
-        $$ = root;
-    }
-;
+program
+    : global_list { root = node_create(PROGRAM, NULL, 1, $1); $$ = root; }
+    ;
 
-global_list: 
-    global {
-        $$ = node_create(GLOBAL_LIST, NULL, 1, $1);
-    }
-    | global global_list{
-        $$ = node_create(GLOBAL_LIST, NULL, 2, $1, $2);
-    }
-;
+global_list
+    : global                { $$ = node_create(GLOBAL_LIST, NULL, 1, $1); }
+    | global global_list    { $$ = node_create(GLOBAL_LIST, NULL, 2, $1, $2); }
+    ;
 
-global: 
-    function {
-        $$ = node_create(GLOBAL, NULL, 1, $1);
-    }
-    | declaration {
-        $$ = node_create(GLOBAL, NULL, 1, $1);
-    }
-;
+global 
+    : function      { $$ = node_create(GLOBAL, NULL, 1, $1); }
+    | declaration   { $$ = node_create(GLOBAL, NULL, 1, $1); }
+    ;
 
-statement_list:
-    statement {
-        $$ = node_create(STATEMENT_LIST, NULL, 1, $1);
-    }
-    | statement_list statement {
-        $$ = node_create(STATEMENT_LIST, NULL, 2, $1, $2);
-    }
-;
+statement_list
+    : statement                 { $$ = node_create(STATEMENT_LIST, NULL, 1, $1); }
+    | statement_list statement  { $$ = node_create(STATEMENT_LIST, NULL, 2, $1, $2); }
+    ;
 
-print_list:
-    print_item {
-        $$ = node_create(PRINT_LIST, NULL, 1, $1);
-    }
-    | print_list ',' print_item {
-        $$ = node_create(PRINT_LIST, NULL, 2, $1, $3);
-    }
-;
+print_list
+    : print_item                { $$ = node_create(PRINT_LIST, NULL, 1, $1); }
+    | print_list ',' print_item { $$ = node_create(PRINT_LIST, NULL, 2, $1, $3); }
+    ;
 
-expression_list:
-    expression {
-        $$ = node_create(EXPRESSION_LIST, NULL, 1, $1);
-    }
-    | print_list ',' expression {
-        $$ = node_create(EXPRESSION_LIST, NULL, 2, $1, $3);
-    }
-;
+expression_list
+    : expression                { $$ = node_create(EXPRESSION_LIST, NULL, 1, $1); }
+    | print_list ',' expression { $$ = node_create(EXPRESSION_LIST, NULL, 2, $1, $3); }
+    ;
 
-variable_list:
-    identifier {
-        $$ = node_create(VARIABLE_LIST, NULL, 1, $1);
-    }
-    | variable_list ',' identifier {
-        $$ = node_create(VARIABLE_LIST, NULL, 2, $1, $3);
-    }
-;
+variable_list
+    : identifier                    { $$ = node_create(VARIABLE_LIST, NULL, 1, $1); }
+    | variable_list ',' identifier  { $$ = node_create(VARIABLE_LIST, NULL, 2, $1, $3); }
+    ;
 
-argument_list:
-    %empty {
-        $$ = node_create(ARGUMENT_LIST, NULL, 0);
-    }
-    | expression_list {
-        $$ = node_create(ARGUMENT_LIST, NULL, 1, $1);
-    }
-;
+argument_list
+    : %empty            { $$ = node_create(ARGUMENT_LIST, NULL, 0); }
+    | expression_list   { $$ = node_create(ARGUMENT_LIST, NULL, 1, $1); }
+    ;
 
-parameter_list:
-    %empty {
-        $$ = node_create(PARAMETER_LIST, NULL, 0);
-    }
-    | variable_list {
-        $$ = node_create(PARAMETER_LIST, NULL, 1, $1);
-    }
-;
+parameter_list
+    : %empty        { $$ = node_create(PARAMETER_LIST, NULL, 0); }
+    | variable_list { $$ = node_create(PARAMETER_LIST, NULL, 1, $1); }
+    ;
 
-declaration_list:
-    declaration {
-        $$ = node_create(DECLARATION_LIST, NULL, 1, $1);
-    }
-    | declaration_list declaration {
-        $$ = node_create(DECLARATION_LIST, NULL, 1, $1, $2);
-    }
+declaration_list
+    : declaration                   { $$ = node_create(DECLARATION_LIST, NULL, 1, $1); }
+    | declaration_list declaration  { $$ = node_create(DECLARATION_LIST, NULL, 1, $1, $2); }
+    ;
 
-function:
-    FUNC identifier '(' parameter_list ')' statement {
-        $$ = node_create(FUNCTION, NULL, 3, $2, $4, $6);
-    }
-;
+function
+    : FUNC identifier '(' parameter_list ')' statement { $$ = node_create(FUNCTION, NULL, 3, $2, $4, $6); }
+    ;
 
-statement: 
-    assign_statement    { $$ = node_create(STATEMENT, NULL, 1, $1); }
+statement
+    : assign_statement  { $$ = node_create(STATEMENT, NULL, 1, $1); }
     | return_statement  { $$ = node_create(STATEMENT, NULL, 1, $1); }
     | print_statement   { $$ = node_create(STATEMENT, NULL, 1, $1); }
     | if_statement      { $$ = node_create(STATEMENT, NULL, 1, $1); }
     | while_statement   { $$ = node_create(STATEMENT, NULL, 1, $1); }
     | null_statement    { $$ = node_create(STATEMENT, NULL, 1, $1); }
     | block             { $$ = node_create(STATEMENT, NULL, 1, $1); }
-;
+    ;
 
-block: 
-    OPENBLOCK declaration_list statement_list CLOSEBLOCK {
-        $$ = node_create(BLOCK, NULL, 2, $2, $3);
-    }
-    | OPENBLOCK statement_list CLOSEBLOCK {
-        $$ = node_create(BLOCK, NULL, 1, $2);
-    }
-;
+block
+    : OPENBLOCK declaration_list statement_list CLOSEBLOCK  { $$ = node_create(BLOCK, NULL, 2, $2, $3); }
+    | OPENBLOCK statement_list CLOSEBLOCK                   { $$ = node_create(BLOCK, NULL, 1, $2);  }
+    ;
 
-assign_statement: 
-    identifier ASSIGNMENT expression {
-        $$ = node_create(ASSIGNMENT_STATEMENT, NULL, 2, $1, $3);
-    }
-;
+assign_statement
+    :  identifier ASSIGNMENT expression { $$ = node_create(ASSIGNMENT_STATEMENT, NULL, 2, $1, $3); } 
+    ;
 
-return_statement: 
-    RETURN expression {
-         $$ = node_create(RETURN_STATEMENT, NULL, 1, $2);
-    }
-;
+return_statement
+    : RETURN expression { $$ = node_create(RETURN_STATEMENT, NULL, 1, $2); }
+    ;
 
-print_statement: 
-    PRINT print_list {
-        $$ = node_create(PRINT_STATEMENT, NULL, 1, $2);
-    }
-;
+print_statement
+    : PRINT print_list { $$ = node_create(PRINT_STATEMENT, NULL, 1, $2); }
+    ;
 
-null_statement: 
-    CONTINUE {
-        $$ = node_create(NULL_STATEMENT, NULL, 0);
-    }
-;
+null_statement
+    : CONTINUE { $$ = node_create(NULL_STATEMENT, NULL, 0); }
+    ;
 
-if_statement: 
-    IF relation THEN statement {
-        $$ = node_create(IF_STATEMENT, NULL, 2, $2, $4);
-    }
+if_statement
+    : IF relation THEN statement                { $$ = node_create(IF_STATEMENT, NULL, 2, $2, $4); }
     | IF relation THEN statement ELSE statement { $$ = node_create(IF_STATEMENT, NULL, 3, $2, $4, $6); }
 ;
 
-while_statement:
-    WHILE relation DO statement {
-        $$ = node_create(WHILE_STATEMENT, NULL, 2, $2, $4);
-    }
-;
+while_statement
+    : WHILE relation DO statement { $$ = node_create(WHILE_STATEMENT, NULL, 2, $2, $4); }
+    ;
 
-relation: 
-    expression '=' expression   { $$ = relation_node($1, $3, "="); }
-    | expression '<' expression { $$ = relation_node($1, $3, "<"); }
-    | expression '>' expression { $$ = relation_node($1, $3, ">"); }
-;
+relation
+    :  expression '=' expression   { $$ = relation_node($1, $3, "="); }
+    | expression '<' expression     { $$ = relation_node($1, $3, "<"); }
+    | expression '>' expression     { $$ = relation_node($1, $3, ">"); }
+    ;
 
-expression: 
-    expression '|' expression       { $$ = binop_node($1, $3, "|");  }
-    | expression '^' expression     { $$ = binop_node($1, $3, "^");  }
-    | expression '&' expression     { $$ = binop_node($1, $3, "&");  }
-    | expression LSHIFT expression  { $$ = binop_node($1, $3, "<<"); }
-    | expression RSHIFT expression  { $$ = binop_node($1, $3, ">>"); }
-    | expression '+' expression     { $$ = binop_node($1, $3, "+");  }
-    | expression '-' expression     { $$ = binop_node($1, $3, "-");  }
-    | expression '*' expression     { $$ = binop_node($1, $3, "*");  }
-    | expression '/' expression     { $$ = binop_node($1, $3, "/");  }
-    | '-' expression                { $$ = unop_node($2, "-"); }
-    | '~' expression                { $$ = unop_node($2, "~"); }
-    | '(' expression ')'            { $$ = $2; }
+expression 
+    : expression '|' expression         { $$ = binop_node($1, $3, "|");  }
+    | expression '^' expression         { $$ = binop_node($1, $3, "^");  }
+    | expression '&' expression         { $$ = binop_node($1, $3, "&");  }
+    | expression LSHIFT expression      { $$ = binop_node($1, $3, "<<"); }
+    | expression RSHIFT expression      { $$ = binop_node($1, $3, ">>"); }
+    | expression '+' expression         { $$ = binop_node($1, $3, "+");  }
+    | expression '-' expression         { $$ = binop_node($1, $3, "-");  }
+    | expression '*' expression         { $$ = binop_node($1, $3, "*");  }
+    | expression '/' expression         { $$ = binop_node($1, $3, "/");  }
+    | '-' expression                    { $$ = unop_node($2, "-"); }
+    | '~' expression                    { $$ = unop_node($2, "~"); }
+    | '(' expression ')'                { $$ = $2; }
     | number                            { $$ = node_create(EXPRESSION, NULL, 1, $1); }
     | identifier                        { $$ = node_create(EXPRESSION, NULL, 1, $1); }
     | identifier '(' argument_list ')'  { $$ = node_create(EXPRESSION, NULL, 2, $1, $3); }
-;
+    ;
 
-declaration: 
-    VAR variable_list {
-        $$ = node_create(DECLARATION, NULL, 1, $2);
-    }
-;
+declaration
+    : VAR variable_list { $$ = node_create(DECLARATION, NULL, 1, $2); }
+    ;
 
-print_item: 
-    expression {
-        $$ = node_create(PRINT_ITEM, NULL, 1, $1);
-    }
-    | string {
-        $$ = node_create(PRINT_ITEM, NULL, 1, $1);
-    }
-;
+print_item
+    : expression { $$ = node_create(PRINT_ITEM, NULL, 1, $1); }
+    | string { $$ = node_create(PRINT_ITEM, NULL, 1, $1); }
+    ;
 
-identifier: 
-    IDENTIFIER {
-        char* node_data = strdup($1);
-        $$ = node_create(IDENTIFIER_DATA, node_data, 0);
-    }
-;
+identifier
+    : IDENTIFIER { char* node_data = strdup($1); $$ = node_create(IDENTIFIER_DATA, node_data, 0); }
+    ;
 
-number: 
-    NUMBER {
-        long* node_data = malloc(sizeof(long));
-        *node_data = $1;
-        $$ = node_create(NUMBER_DATA, node_data, 0);
-    }
-;
+number
+    : NUMBER { long* node_data = malloc(sizeof(long)); *node_data = $1; $$ = node_create(NUMBER_DATA, node_data, 0); }
+    ;
 
-string: 
-    STRING {
-        char* node_data = strdup($1);
-        $$ = node_create(STRING_DATA, node_data, 0);
-    }
-;
+string
+    : STRING { char* node_data = strdup($1); $$ = node_create(STRING_DATA, node_data, 0); }
+    ;
 %%
 
 int yyerror (const char *error)
