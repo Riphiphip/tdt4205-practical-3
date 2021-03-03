@@ -30,7 +30,7 @@ node_t* unop_node(node_t* exp1, char* optype) {
 //%expect 1
 
 %token FUNC PRINT RETURN CONTINUE IF THEN ELSE WHILE DO OPENBLOCK CLOSEBLOCK
-%token VAR NUMBER IDENTIFIER STRING LSHIFT RSHIFT ASSIGNMENT
+%token VAR NUMBER IDENTIFIER STRING LSHIFT RSHIFT ASSIGNMENT UMINUS
 
 %union {
     long number;
@@ -156,7 +156,7 @@ expression
     | expression '-' expression         { $$ = binop_node($1, $3, "-");  }
     | expression '*' expression         { $$ = binop_node($1, $3, "*");  }
     | expression '/' expression         { $$ = binop_node($1, $3, "/");  }
-    | '-' expression                    { $$ = unop_node($2, "-"); }
+    | UMINUS expression                 { $$ = unop_node($2, "-"); }
     | '~' expression                    { $$ = unop_node($2, "~"); }
     | '(' expression ')'                { $$ = $2; }
     | number                            { $$ = node_create(EXPRESSION, NULL, 1, $1); }
