@@ -50,7 +50,7 @@ extern YYSTYPE yylval;
 
 <IN_STRING>{
     "\\\""                  { yymore(); }
-    "\""                    { yylval.string = yytext; BEGIN(INITIAL); return STRING;}
+    "\""                    { yytext[strlen(yytext)-1] = 0; yylval.string = yytext; BEGIN(INITIAL); return STRING;}
     .                       { yymore(); }
 }
 %%
