@@ -1,5 +1,22 @@
 %{
 #include <vslc.h>
+
+
+node_t* relation_node(node_t* exp1, node_t* exp2, char* optype)
+{
+    char* node_data = strdup(optype);
+    return node_create(RELATION, node_data, 2, exp1, exp2);
+}
+
+node_t* binop_node(node_t* exp1, node_t* exp2, char* optype) {
+    char* node_data = strdup(optype);
+    return node_create(EXPRESSION, node_data, 2, exp1, exp2); 
+}
+
+node_t* unop_node(node_t* exp1, char* optype) {
+    char* node_data = strdup(optype);
+    return node_create(EXPRESSION, node_data, 1, exp1); 
+}
 %}
 %left '|'
 %left '^'
@@ -144,7 +161,7 @@ block:
 
 assign_statement: 
     identifier ASSIGNMENT expression {
-        $$ = node_create(ASSIGN_STATEMENT, NULL, 2, $1, $3);
+        $$ = node_create(ASSIGNMENT_STATEMENT, NULL, 2, $1, $3);
     }
 ;
 
@@ -197,9 +214,12 @@ expression:
     | expression '-' expression     { $$ = binop_node($1, $3, "-");  }
     | expression '*' expression     { $$ = binop_node($1, $3, "*");  }
     | expression '/' expression     { $$ = binop_node($1, $3, "/");  }
-    | '-' expression        { $$ = unop_node($2, "-"); }
-    | '~' expression        { $$ = unop_node($2, "~"); }
-    | '(' expression ')'    { $$ = $2; }
+    | '-' expression                { $$ = unop_node($2, "-"); }
+    | '~' expression                { $$ = unop_node($2, "~"); }
+    | '(' expression ')'            { $$ = $2; }
+    | number                            { $$ = node_create(EXPRESSION, NULL, 1, $1); }
+    | identifier                        { $$ = node_create(EXPRESSION, NULL, 1, $1); }
+    | identifier '(' argument_list ')'  { $$ = node_create(EXPRESSION, NULL, 2, $1, $3); }
 ;
 
 declaration: 
@@ -245,21 +265,4 @@ yyerror ( const char *error )
 {
     fprintf ( stderr, "%s on line %d\n", error, yylineno );
     exit ( EXIT_FAILURE );
-}
-
-
-node_t* relation_node(node_t* exp1, node_t* exp2, char* optype)
-{
-    char* node_data = strdup(optype);
-    return node_create(RELATION, node_data, 2, exp1, exp2);
-}
-
-node_t* binop_node(node_t* exp1, node_t* exp2, char* optype) {
-    char* node_data = strdup(optype);
-    return node_create(EXPRESSION, node_data, 2, exp1, exp2); 
-}
-
-node_t* unop_node(node_t* exp1, char* optype) {
-    char* node_data = strdup(optype);
-    return node_create(EXPRESSION, node_data, 1, exp1); 
 }
